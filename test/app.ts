@@ -1,7 +1,5 @@
 import { html, LitElement, render } from 'lit';
 import { Signal } from 'signal-polyfill';
-import { component } from './component';
-import { cache } from 'lit/directives/cache.js';
 import {SignalWatcher} from '@lit-labs/signals'
 
 const count = new Signal.State(0)
