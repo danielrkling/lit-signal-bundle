@@ -5,17 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build":"npm run build:js && npm run build:types",
+    "build:js": "esbuild src/index.ts --outfile=dist/signals.js --bundle --format=esm --minify --analyze",
+    "build:types": "dts-bundle-generator -o dist/signals.d.ts src/index.ts --external-inlines signal-polyfill signal-utils"
   },
   "dependencies": {
-    "@lit-labs/signals": "^0.1.1",
-    "lit": "^3.2.0",
     "signal-polyfill": "^0.2.0",
     "signal-utils": "^0.20.0"
   },
   "devDependencies": {
     "dts-bundle-generator": "^9.5.1",
+    "esbuild": "^0.24.0",
     "typescript": "^5.5.3",
     "vite": "^5.4.8"
   }

@@ -1,31 +1,27 @@
-import { html, LitElement, render } from 'lit';
-import { Signal } from 'signal-polyfill';
-import {SignalWatcher} from '@lit-labs/signals'
-
-const count = new Signal.State(0)
-
-class Counter extends SignalWatcher(LitElement) {
-
-  count = new Signal.State(0)
+import { signal, writableMemo, effect } from "../src/index";
 
 
-  render() {
-    return html`
-      <button @click=${this.#decrement}>-</button>
-      ${this.count.get()}
-      <button @click=${this.#increment}>+</button>
-    `;
-  }
 
-  #decrement() {
-    this.count.set(this.count.get() - 1);
-  }
+const count1 = signal(0)
 
-  #increment() {
-    this.count.set(this.count.get() + 1);
-  }
+const count2 = writableMemo(()=>count1.get())
 
-}
-customElements.define("c-counter", Counter)
+console.log(count2.get())
 
-render(html`<c-counter  .count=${count} ></c-counter><c-counter  .count=${count} ></c-counter>`, document.body);
+const button1 = document.createElement("button");
+button1.onclick = ()=>count1.set(count1.get()+1)
+
+effect(()=>{
+  button1.innerText ="1:"+ count1.get()
+})
+
+document.body.appendChild(button1)
+
+const button2 = document.createElement("button");
+button2.onclick = ()=>count2.set(count2.get()+1)
+
+effect(()=>{
+  button2.innerText ="2:"+ count2.get()
+})
+
+document.body.appendChild(button2)

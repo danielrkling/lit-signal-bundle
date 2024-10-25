@@ -112,6 +112,7 @@ abstract class Control<TValue> {
     throw new Error("Getter 'value' must be implemented in derived class.");
   }
 
+  //@ts-ignore
   setValue(value: TValue) {
     this.#isValidated.set(false);
   }

@@ -20,3 +20,23 @@ export {asyncMemo, AsyncMemo} from './asyncMemo.js'
 export { Form} from './form.js'
 
 
+export function writableMemo<T>(computation: () => T, options?: Signal.Options<T>){
+  const signal = new Signal.State(computation(),options)
+  const update = new Signal.Computed(()=>{
+    signal.set(computation())
+  })
+  let pending = false
+  const watcher = new Signal.subtle.Watcher(()=>{
+    if (!pending){
+      pending = true
+      queueMicrotask(()=>{
+        pending=false
+        update.get()      
+      })    
+    }
+    watcher.watch()
+  })
+  watcher.watch(update)
+  update.get()
+  return signal
+}
