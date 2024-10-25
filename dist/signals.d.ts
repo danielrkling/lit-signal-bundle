@@ -380,9 +380,9 @@ declare class Field<TParent, TKey extends keyof TParent = keyof TParent, TValue 
 	setValue(value: TValue): void;
 	focusError(): boolean;
 }
+export declare function writableMemo<T>(computation: () => T, options?: Signal.Options<T>): Signal.State<T>;
 export declare function signal<T>(initialValue: T, options?: Signal.Options<T>): Signal.State<T>;
 export declare function memo<T>(computation: () => T, options?: Signal.Options<T>): Signal.Computed<T>;
-export declare function writableMemo<T>(computation: () => T, options?: Signal.Options<T>): Signal.State<T>;
 
 export {
 	SignalObject$1 as SignalObject,

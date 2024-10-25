@@ -1,9 +1,5 @@
 import { AsyncMemo, AsyncMemoFetch, AsyncMemoOptions } from "./asyncMemo";
 
-export type QueryProps<T> = AsyncMemoOptions<T> & {
-  key: string;
-};
-
 export const queryMap = new Map<string, AsyncMemo<any>>();
 
 export function query<T>(
