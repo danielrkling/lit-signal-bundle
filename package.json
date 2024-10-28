@@ -5,9 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:js && npm run build:types",
-    "build:js": "esbuild src/index.ts --outfile=dist/lit-signals.js --bundle --format=esm --minify --analyze",
-    "build:types": "dts-bundle-generator -o dist/lit-signals.d.ts src/index.ts --external-inlines signal-polyfill signal-utils lit lit-html lit-element @lit/reactive-element @types/trusted-types @lit-labs/signals @lit/context"
+    "build:lit": "npm run build:lit:js && npm run build:lit:types",
+    "build:lit:js": "esbuild lit/src/index.ts --outfile=dist/lit.js --bundle --format=esm --minify --analyze",
+    "build:lit:types": "dts-bundle-generator -o dist/lit.d.ts lit/src/index.ts --external-inlines lit lit-html lit-element @lit/reactive-element @types/trusted-types @lit/context",
+    "build:lit+signals": "npm run build:lit+signals:js && npm run build:lit+signals:types ",
+    "build:lit+signals:js": "esbuild lit+signals/src/index.ts --outfile=dist/lit+signals.js --bundle --format=esm --analyze  --alias:signal-polyfill=./signals.js --external:./signals.js  --alias:lit=./lit.js --alias:lit/html.js=./lit.js --alias:lit/async-directive.js=./lit.js --alias:lit/directive.js=./lit.js --external:./lit.js",
+    "build:lit+signals:types": "dts-bundle-generator -o dist/lit+signals.d.ts lit+signals/src/index.ts --external-inlines @lit-labs/signals",
+    "build:signals": "npm run build:signals:js && npm run build:signals:types",
+    "build:signals:js": "esbuild signals/src/index.ts --outfile=dist/signals.js --bundle --format=esm --minify --analyze",
+    "build:signals:types": "dts-bundle-generator -o dist/signals.d.ts signals/src/index.ts --external-inlines signal-polyfill signal-utils"
+
   },
   "dependencies": {
     "@lit-labs/context": "^0.5.1",

@@ -143,6 +143,29 @@ export interface ReactiveController {
 	hostUpdated?(): void;
 }
 /**
+ * Contains types that are part of the unstable debug API.
+ *
+ * Everything in this API is not stable and may change or be removed in the future,
+ * even on patch releases.
+ */
+export declare namespace ReactiveUnstable {
+	/**
+	 * When Lit is running in dev mode and `window.emitLitDebugLogEvents` is true,
+	 * we will emit 'lit-debug' events to window, with live details about the update and render
+	 * lifecycle. These can be useful for writing debug tooling and visualizations.
+	 *
+	 * Please be aware that running with window.emitLitDebugLogEvents has performance overhead,
+	 * making certain operations that are normally very cheap (like a no-op render) much slower,
+	 * because we must copy data and dispatch events.
+	 */
+	namespace DebugLog {
+		type Entry = Update;
+		interface Update {
+			kind: "update";
+		}
+	}
+}
+/**
  * Converts property values to and from attribute values.
  */
 export interface ComplexAttributeConverter<Type = unknown, TypeHint = unknown> {
@@ -901,6 +924,163 @@ declare class TrustedHTML$1 {
 	private brand: true; // To prevent structural typing.
 }
 /**
+ * Contains types that are part of the unstable debug API.
+ *
+ * Everything in this API is not stable and may change or be removed in the future,
+ * even on patch releases.
+ */
+export declare namespace LitUnstable {
+	/**
+	 * When Lit is running in dev mode and `window.emitLitDebugLogEvents` is true,
+	 * we will emit 'lit-debug' events to window, with live details about the update and render
+	 * lifecycle. These can be useful for writing debug tooling and visualizations.
+	 *
+	 * Please be aware that running with window.emitLitDebugLogEvents has performance overhead,
+	 * making certain operations that are normally very cheap (like a no-op render) much slower,
+	 * because we must copy data and dispatch events.
+	 */
+	namespace DebugLog {
+		type Entry = TemplatePrep | TemplateInstantiated | TemplateInstantiatedAndUpdated | TemplateUpdating | BeginRender | EndRender | CommitPartEntry | SetPartValue;
+		interface TemplatePrep {
+			kind: "template prep";
+			template: Template;
+			strings: TemplateStringsArray;
+			clonableTemplate: HTMLTemplateElement;
+			parts: TemplatePart[];
+		}
+		interface BeginRender {
+			kind: "begin render";
+			id: number;
+			value: unknown;
+			container: HTMLElement | DocumentFragment;
+			options: RenderOptions | undefined;
+			part: ChildPart | undefined;
+		}
+		interface EndRender {
+			kind: "end render";
+			id: number;
+			value: unknown;
+			container: HTMLElement | DocumentFragment;
+			options: RenderOptions | undefined;
+			part: ChildPart;
+		}
+		interface TemplateInstantiated {
+			kind: "template instantiated";
+			template: Template | CompiledTemplate;
+			instance: TemplateInstance;
+			options: RenderOptions | undefined;
+			fragment: Node;
+			parts: Array<Part | undefined>;
+			values: unknown[];
+		}
+		interface TemplateInstantiatedAndUpdated {
+			kind: "template instantiated and updated";
+			template: Template | CompiledTemplate;
+			instance: TemplateInstance;
+			options: RenderOptions | undefined;
+			fragment: Node;
+			parts: Array<Part | undefined>;
+			values: unknown[];
+		}
+		interface TemplateUpdating {
+			kind: "template updating";
+			template: Template | CompiledTemplate;
+			instance: TemplateInstance;
+			options: RenderOptions | undefined;
+			parts: Array<Part | undefined>;
+			values: unknown[];
+		}
+		interface SetPartValue {
+			kind: "set part";
+			part: Part;
+			value: unknown;
+			valueIndex: number;
+			values: unknown[];
+			templateInstance: TemplateInstance;
+		}
+		type CommitPartEntry = CommitNothingToChildEntry | CommitText | CommitNode | CommitAttribute | CommitProperty | CommitBooleanAttribute | CommitEventListener | CommitToElementBinding;
+		interface CommitNothingToChildEntry {
+			kind: "commit nothing to child";
+			start: ChildNode;
+			end: ChildNode | null;
+			parent: Disconnectable | undefined;
+			options: RenderOptions | undefined;
+		}
+		interface CommitText {
+			kind: "commit text";
+			node: Text;
+			value: unknown;
+			options: RenderOptions | undefined;
+		}
+		interface CommitNode {
+			kind: "commit node";
+			start: Node;
+			parent: Disconnectable | undefined;
+			value: Node;
+			options: RenderOptions | undefined;
+		}
+		interface CommitAttribute {
+			kind: "commit attribute";
+			element: Element;
+			name: string;
+			value: unknown;
+			options: RenderOptions | undefined;
+		}
+		interface CommitProperty {
+			kind: "commit property";
+			element: Element;
+			name: string;
+			value: unknown;
+			options: RenderOptions | undefined;
+		}
+		interface CommitBooleanAttribute {
+			kind: "commit boolean attribute";
+			element: Element;
+			name: string;
+			value: boolean;
+			options: RenderOptions | undefined;
+		}
+		interface CommitEventListener {
+			kind: "commit event listener";
+			element: Element;
+			name: string;
+			value: unknown;
+			oldListener: unknown;
+			options: RenderOptions | undefined;
+			removeListener: boolean;
+			addListener: boolean;
+		}
+		interface CommitToElementBinding {
+			kind: "commit to element binding";
+			element: Element;
+			value: unknown;
+			options: RenderOptions | undefined;
+		}
+	}
+}
+/**
+ * Used to sanitize any value before it is written into the DOM. This can be
+ * used to implement a security policy of allowed and disallowed values in
+ * order to prevent XSS attacks.
+ *
+ * One way of using this callback would be to check attributes and properties
+ * against a list of high risk fields, and require that values written to such
+ * fields be instances of a class which is safe by construction. Closure's Safe
+ * HTML Types is one implementation of this technique (
+ * https://github.com/google/safe-html-types/blob/master/doc/safehtml-types.md).
+ * The TrustedTypes polyfill in API-only mode could also be used as a basis
+ * for this technique (https://github.com/WICG/trusted-types).
+ *
+ * @param node The HTML node (usually either a #text node or an Element) that
+ *     is being written to. Note that this is just an exemplar node, the write
+ *     may take place against another instance of the same class of node.
+ * @param name The name of an attribute or property (for example, 'href').
+ * @param type Indicates whether the write that's about to be performed will
+ *     be to a property or a node.
+ * @return A function that will sanitize this class of writes.
+ */
+export type SanitizerFactory = (node: Node, name: string, type: "property" | "attribute") => ValueSanitizer;
+/**
  * A function which can sanitize values that will be written to a specific kind
  * of DOM sink.
  *
@@ -970,6 +1150,9 @@ export type MaybeCompiledTemplateResult<T extends ResultType = ResultType> = Unc
  * {@linkcode UncompiledTemplateResult} explicitly.
  */
 export type TemplateResult<T extends ResultType = ResultType> = UncompiledTemplateResult<T>;
+export type HTMLTemplateResult = TemplateResult<typeof HTML_RESULT>;
+export type SVGTemplateResult = TemplateResult<typeof SVG_RESULT>;
+export type MathMLTemplateResult = TemplateResult<typeof MATHML_RESULT>;
 /**
  * A TemplateResult that has been compiled by @lit-labs/compiler, skipping the
  * prepare step.
@@ -982,8 +1165,45 @@ export interface CompiledTemplate extends Omit<Template, "el"> {
 	el?: HTMLTemplateElement;
 	h: TemplateStringsArray;
 }
-declare const html: (strings: TemplateStringsArray, ...values: unknown[]) => TemplateResult<1>;
-declare const svg: (strings: TemplateStringsArray, ...values: unknown[]) => TemplateResult<2>;
+/**
+ * Interprets a template literal as an HTML template that can efficiently
+ * render to and update a container.
+ *
+ * ```ts
+ * const header = (title: string) => html`<h1>${title}</h1>`;
+ * ```
+ *
+ * The `html` tag returns a description of the DOM to render as a value. It is
+ * lazy, meaning no work is done until the template is rendered. When rendering,
+ * if a template comes from the same expression as a previously rendered result,
+ * it's efficiently updated instead of replaced.
+ */
+export declare const html: (strings: TemplateStringsArray, ...values: unknown[]) => TemplateResult<1>;
+/**
+ * Interprets a template literal as an SVG fragment that can efficiently render
+ * to and update a container.
+ *
+ * ```ts
+ * const rect = svg`<rect width="10" height="10"></rect>`;
+ *
+ * const myImage = html`
+ *   <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+ *     ${rect}
+ *   </svg>`;
+ * ```
+ *
+ * The `svg` *tag function* should only be used for SVG fragments, or elements
+ * that would be contained **inside** an `<svg>` HTML element. A common error is
+ * placing an `<svg>` *element* in a template tagged with the `svg` tag
+ * function. The `<svg>` element is an HTML element and should be used within a
+ * template tagged with the {@linkcode html} tag function.
+ *
+ * In LitElement usage, it's invalid to return an SVG fragment from the
+ * `render()` method, as the SVG fragment will be contained within the element's
+ * shadow root and thus not be properly contained within an `<svg>` HTML
+ * element.
+ */
+export declare const svg: (strings: TemplateStringsArray, ...values: unknown[]) => TemplateResult<2>;
 /**
  * Interprets a template literal as MathML fragment that can efficiently render
  * to and update a container.
@@ -1087,7 +1307,12 @@ export interface Disconnectable {
 	_$disconnectableChildren?: Set<Disconnectable>;
 	_$isConnected: boolean;
 }
-declare class TemplateInstance implements Disconnectable {
+declare function resolveDirective(part: ChildPart | AttributePart | ElementPart, value: unknown, parent?: DirectiveParent, attributeIndex?: number): unknown;
+/**
+ * An updateable instance of a Template. Holds references to the Parts used to
+ * update the template instance.
+ */
+export declare class TemplateInstance implements Disconnectable {
 	_$template: Template;
 	_$parts: Array<Part | undefined>;
 	constructor(template: Template, parent: ChildPart);
@@ -1224,6 +1449,94 @@ export declare class ElementPart implements Disconnectable {
 	_$setValue(value: unknown): void;
 }
 /**
+ * END USERS SHOULD NOT RELY ON THIS OBJECT.
+ *
+ * Private exports for use by other Lit packages, not intended for use by
+ * external users.
+ *
+ * We currently do not make a mangled rollup build of the lit-ssr code. In order
+ * to keep a number of (otherwise private) top-level exports mangled in the
+ * client side code, we export a _$LH object containing those members (or
+ * helper methods for accessing private fields of those members), and then
+ * re-export them for use in lit-ssr. This keeps lit-ssr agnostic to whether the
+ * client-side code is being used in `dev` mode or `prod` mode.
+ *
+ * This has a unique name, to disambiguate it from private exports in
+ * lit-element, which re-exports all of lit-html.
+ *
+ * @private
+ */
+export declare const _$LH: {
+	_boundAttributeSuffix: string;
+	_marker: string;
+	_markerMatch: string;
+	_HTML_RESULT: number;
+	_getTemplateHtml: (strings: TemplateStringsArray, type: ResultType) => [
+		TrustedHTML$1,
+		Array<string>
+	];
+	_TemplateInstance: typeof TemplateInstance;
+	_isIterable: (value: unknown) => value is Iterable<unknown>;
+	_resolveDirective: typeof resolveDirective;
+	_ChildPart: typeof ChildPart;
+	_AttributePart: typeof AttributePart;
+	_BooleanAttributePart: typeof BooleanAttributePart;
+	_EventPart: typeof EventPart;
+	_PropertyPart: typeof PropertyPart;
+	_ElementPart: typeof ElementPart;
+};
+/**
+ * Renders a value, usually a lit-html TemplateResult, to the container.
+ *
+ * This example renders the text "Hello, Zoe!" inside a paragraph tag, appending
+ * it to the container `document.body`.
+ *
+ * ```js
+ * import {html, render} from 'lit';
+ *
+ * const name = "Zoe";
+ * render(html`<p>Hello, ${name}!</p>`, document.body);
+ * ```
+ *
+ * @param value Any [renderable
+ *   value](https://lit.dev/docs/templates/expressions/#child-expressions),
+ *   typically a {@linkcode TemplateResult} created by evaluating a template tag
+ *   like {@linkcode html} or {@linkcode svg}.
+ * @param container A DOM container to render to. The first render will append
+ *   the rendered value to the container, and subsequent renders will
+ *   efficiently update the rendered value if the same result type was
+ *   previously rendered there.
+ * @param options See {@linkcode RenderOptions} for options documentation.
+ * @see
+ * {@link https://lit.dev/docs/libraries/standalone-templates/#rendering-lit-html-templates| Rendering Lit HTML Templates}
+ */
+export declare const render: {
+	(value: unknown, container: HTMLElement | DocumentFragment, options?: RenderOptions): RootPart;
+	setSanitizer: (newSanitizer: SanitizerFactory) => void;
+	createSanitizer: SanitizerFactory;
+	_testOnlyClearSanitizerFactoryDoNotCallOrElse: () => void;
+};
+/**
+ * Contains types that are part of the unstable debug API.
+ *
+ * Everything in this API is not stable and may change or be removed in the future,
+ * even on patch releases.
+ */
+export declare namespace Unstable {
+	/**
+	 * When Lit is running in dev mode and `window.emitLitDebugLogEvents` is true,
+	 * we will emit 'lit-debug' events to window, with live details about the update and render
+	 * lifecycle. These can be useful for writing debug tooling and visualizations.
+	 *
+	 * Please be aware that running with window.emitLitDebugLogEvents has performance overhead,
+	 * making certain operations that are normally very cheap (like a no-op render) much slower,
+	 * because we must copy data and dispatch events.
+	 */
+	namespace DebugLog {
+		type Entry = LitUnstable.DebugLog.Entry | ReactiveUnstable.DebugLog.Entry;
+	}
+}
+/**
  * Base element class that manages element properties and attributes, and
  * renders a lit-html template.
  *
@@ -1301,6 +1614,28 @@ export declare class LitElement extends ReactiveElement {
 	 */
 	protected render(): unknown;
 }
+/**
+ * END USERS SHOULD NOT RELY ON THIS OBJECT.
+ *
+ * Private exports for use by other Lit packages, not intended for use by
+ * external users.
+ *
+ * We currently do not make a mangled rollup build of the lit-ssr code. In order
+ * to keep a number of (otherwise private) top-level exports  mangled in the
+ * client side code, we export a _$LE object containing those members (or
+ * helper methods for accessing private fields of those members), and then
+ * re-export them for use in lit-ssr. This keeps lit-ssr agnostic to whether the
+ * client-side code is being used in `dev` mode or `prod` mode.
+ *
+ * This has a unique name, to disambiguate it from private exports in
+ * lit-html, since this module re-exports all of lit-html.
+ *
+ * @private
+ */
+export declare const _$LE: {
+	_$attributeToProperty: (el: LitElement, name: string, value: string | null) => void;
+	_$changedProperties: (el: LitElement) => any;
+};
 /**
  * @license
  * Copyright 2022 Google LLC
@@ -1990,551 +2325,6 @@ export type Falsy = null | undefined | false | 0 | -0 | 0n | "";
 export declare function when<C extends Falsy, T, F = undefined>(condition: C, trueCase: (c: C) => T, falseCase?: (c: C) => F): F;
 export declare function when<C, T, F>(condition: C extends Falsy ? never : C, trueCase: (c: C) => T, falseCase?: (c: C) => F): T;
 export declare function when<C, T, F = undefined>(condition: C, trueCase: (c: Exclude<C, Falsy>) => T, falseCase?: (c: Extract<C, Falsy>) => F): C extends Falsy ? F : T;
-declare class OnMount extends AsyncDirective {
-	render(): unknown;
-	update(_part: Part, [fn]: [
-		(elem: Element) => void
-	]): unknown;
-}
-export declare const onMount: () => DirectiveResult<typeof OnMount>;
-declare class OnDismount extends AsyncDirective {
-	render(): unknown;
-	elem: Element | undefined;
-	fn: ((elem: Element) => void) | undefined;
-	update(_part: Part, [fn]: [
-		(elem: Element) => void
-	]): unknown;
-	protected disconnected(): void;
-}
-export declare const onDismount: () => DirectiveResult<typeof OnDismount>;
-export declare function LightDOM<T extends new (...args: any[]) => LitElement>(base: T): T;
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-export type Version = number & {
-	__brand: "Version";
-};
-/**
- * A producer and/or consumer which participates in the reactive graph.
- *
- * Producer `ReactiveNode`s which are accessed when a consumer `ReactiveNode` is the
- * `activeConsumer` are tracked as dependencies of that consumer.
- *
- * Certain consumers are also tracked as "live" consumers and create edges in the other direction,
- * from producer to consumer. These edges are used to propagate change notifications when a
- * producer's value is updated.
- *
- * A `ReactiveNode` may be both a producer and consumer.
- */
-export interface ReactiveNode {
-	/**
-	 * Version of the value that this node produces.
-	 *
-	 * This is incremented whenever a new value is produced by this node which is not equal to the
-	 * previous value (by whatever definition of equality is in use).
-	 */
-	version: Version;
-	/**
-	 * Epoch at which this node is verified to be clean.
-	 *
-	 * This allows skipping of some polling operations in the case where no signals have been set
-	 * since this node was last read.
-	 */
-	lastCleanEpoch: Version;
-	/**
-	 * Whether this node (in its consumer capacity) is dirty.
-	 *
-	 * Only live consumers become dirty, when receiving a change notification from a dependency
-	 * producer.
-	 */
-	dirty: boolean;
-	/**
-	 * Producers which are dependencies of this consumer.
-	 *
-	 * Uses the same indices as the `producerLastReadVersion` and `producerIndexOfThis` arrays.
-	 */
-	producerNode: ReactiveNode[] | undefined;
-	/**
-	 * `Version` of the value last read by a given producer.
-	 *
-	 * Uses the same indices as the `producerNode` and `producerIndexOfThis` arrays.
-	 */
-	producerLastReadVersion: Version[] | undefined;
-	/**
-	 * Index of `this` (consumer) in each producer's `liveConsumers` array.
-	 *
-	 * This value is only meaningful if this node is live (`liveConsumers.length > 0`). Otherwise
-	 * these indices are stale.
-	 *
-	 * Uses the same indices as the `producerNode` and `producerLastReadVersion` arrays.
-	 */
-	producerIndexOfThis: number[] | undefined;
-	/**
-	 * Index into the producer arrays that the next dependency of this node as a consumer will use.
-	 *
-	 * This index is zeroed before this node as a consumer begins executing. When a producer is read,
-	 * it gets inserted into the producers arrays at this index. There may be an existing dependency
-	 * in this location which may or may not match the incoming producer, depending on whether the
-	 * same producers were read in the same order as the last computation.
-	 */
-	nextProducerIndex: number;
-	/**
-	 * Array of consumers of this producer that are "live" (they require push notifications).
-	 *
-	 * `liveConsumerNode.length` is effectively our reference count for this node.
-	 */
-	liveConsumerNode: ReactiveNode[] | undefined;
-	/**
-	 * Index of `this` (producer) in each consumer's `producerNode` array.
-	 *
-	 * Uses the same indices as the `liveConsumerNode` array.
-	 */
-	liveConsumerIndexOfThis: number[] | undefined;
-	/**
-	 * Whether writes to signals are allowed when this consumer is the `activeConsumer`.
-	 *
-	 * This is used to enforce guardrails such as preventing writes to writable signals in the
-	 * computation function of computed signals, which is supposed to be pure.
-	 */
-	consumerAllowSignalWrites: boolean;
-	readonly consumerIsAlwaysLive: boolean;
-	/**
-	 * Tracks whether producers need to recompute their value independently of the reactive graph (for
-	 * example, if no initial value has been computed).
-	 */
-	producerMustRecompute(node: unknown): boolean;
-	producerRecomputeValue(node: unknown): void;
-	consumerMarkedDirty(this: unknown): void;
-	/**
-	 * Called when a signal is read within this consumer.
-	 */
-	consumerOnSignalRead(node: unknown): void;
-	/**
-	 * Called when the signal becomes "live"
-	 */
-	watched?(): void;
-	/**
-	 * Called when the signal stops being "live"
-	 */
-	unwatched?(): void;
-	/**
-	 * Optional extra data for embedder of this signal library.
-	 * Sent to various callbacks as the this value.
-	 */
-	wrapper?: any;
-}
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * A comparison function which can determine if two values are equal.
- */
-export type ValueEqualityFn<T> = (a: T, b: T) => boolean;
-export interface SignalNode<T> extends ReactiveNode {
-	value: T;
-	equal: ValueEqualityFn<T>;
-}
-/**
- * A computation, which derives a value from a declarative reactive expression.
- *
- * `Computed`s are both producers and consumers of reactivity.
- */
-export interface ComputedNode<T> extends ReactiveNode {
-	/**
-	 * Current value of the computation, or one of the sentinel values above (`UNSET`, `COMPUTING`,
-	 * `ERROR`).
-	 */
-	value: T;
-	/**
-	 * If `value` is `ERRORED`, the error caught from the last computation attempt which will
-	 * be re-thrown.
-	 */
-	error: unknown;
-	/**
-	 * The computation function which will produce a new value.
-	 */
-	computation: () => T;
-	equal: ValueEqualityFn<T>;
-}
-declare const NODE: unique symbol;
-export declare namespace Signal {
-	export let isState: (s: any) => boolean, isComputed: (s: any) => boolean, isWatcher: (s: any) => boolean;
-	export class State<T> {
-		#private;
-		readonly [NODE]: SignalNode<T>;
-		constructor(initialValue: T, options?: Signal.Options<T>);
-		get(): T;
-		set(newValue: T): void;
-	}
-	export class Computed<T> {
-		#private;
-		readonly [NODE]: ComputedNode<T>;
-		constructor(computation: () => T, options?: Signal.Options<T>);
-		get(): T;
-	}
-	type AnySignal<T = any> = State<T> | Computed<T>;
-	type AnySink = Computed<any> | subtle.Watcher;
-	export namespace subtle {
-		function untrack<T>(cb: () => T): T;
-		function introspectSources(sink: AnySink): AnySignal[];
-		function introspectSinks(signal: AnySignal): AnySink[];
-		function hasSinks(signal: AnySignal): boolean;
-		function hasSources(signal: AnySink): boolean;
-		class Watcher {
-			#private;
-			readonly [NODE]: ReactiveNode;
-			constructor(notify: (this: Watcher) => void);
-			watch(...signals: AnySignal[]): void;
-			unwatch(...signals: AnySignal[]): void;
-			getPending(): Computed<any>[];
-		}
-		function currentComputed(): Computed<any> | undefined;
-		const watched: unique symbol;
-		const unwatched: unique symbol;
-	}
-	export interface Options<T> {
-		equals?: (this: AnySignal<T>, t: T, t2: T) => boolean;
-		[Signal.subtle.watched]?: (this: AnySignal<T>) => void;
-		[Signal.subtle.unwatched]?: (this: AnySignal<T>) => void;
-	}
-	export {};
-}
-export interface SignalArray<T = unknown> extends Array<T> {
-}
-export declare class SignalArray<T = unknown> {
-	#private;
-	/**
-	 * Creates an array from an iterable object.
-	 * @param iterable An iterable object to convert to an array.
-	 */
-	static from<T>(iterable: Iterable<T> | ArrayLike<T>): SignalArray<T>;
-	/**
-	 * Creates an array from an iterable object.
-	 * @param iterable An iterable object to convert to an array.
-	 * @param mapfn A mapping function to call on every element of the array.
-	 * @param thisArg Value of 'this' used to invoke the mapfn.
-	 */
-	static from<T, U>(iterable: Iterable<T> | ArrayLike<T>, mapfn: (v: T, k: number) => U, thisArg?: unknown): SignalArray<U>;
-	static of<T>(...arr: T[]): SignalArray<T>;
-	constructor(arr?: T[]);
-}
-export interface SignalObject {
-	fromEntries<T = unknown>(entries: Iterable<readonly [
-		PropertyKey,
-		T
-	]>): {
-		[k: string]: T;
-	};
-	new <T extends Record<PropertyKey, unknown> = Record<PropertyKey, unknown>>(obj?: T): T;
-}
-/**
- * Create a reactive Object, backed by Signals, using a Proxy.
- * This allows dynamic creation and deletion of signals using the object primitive
- * APIs that most folks are familiar with -- the only difference is instantiation.
- * ```js
- * const obj = new SignalObject({ foo: 123 });
- *
- * obj.foo // 123
- * obj.foo = 456
- * obj.foo // 456
- * obj.bar = 2
- * obj.bar // 2
- * ```
- */
-declare const SignalObject$1: SignalObject;
-export declare class SignalMap<K = unknown, V = unknown> implements Map<K, V> {
-	private collection;
-	private storages;
-	private vals;
-	private readStorageFor;
-	private dirtyStorageFor;
-	constructor();
-	constructor(entries: readonly (readonly [
-		K,
-		V
-	])[] | null);
-	constructor(iterable: Iterable<readonly [
-		K,
-		V
-	]>);
-	get(key: K): V | undefined;
-	has(key: K): boolean;
-	entries(): IterableIterator<[
-		K,
-		V
-	]>;
-	keys(): IterableIterator<K>;
-	values(): IterableIterator<V>;
-	forEach(fn: (value: V, key: K, map: Map<K, V>) => void): void;
-	get size(): number;
-	[Symbol.iterator](): IterableIterator<[
-		K,
-		V
-	]>;
-	get [Symbol.toStringTag](): string;
-	set(key: K, value: V): this;
-	delete(key: K): boolean;
-	clear(): void;
-}
-export declare class SignalSet<T = unknown> implements Set<T> {
-	private collection;
-	private storages;
-	private vals;
-	private storageFor;
-	private dirtyStorageFor;
-	constructor();
-	constructor(values: readonly T[] | null);
-	constructor(iterable: Iterable<T>);
-	has(value: T): boolean;
-	entries(): IterableIterator<[
-		T,
-		T
-	]>;
-	keys(): IterableIterator<T>;
-	values(): IterableIterator<T>;
-	forEach(fn: (value1: T, value2: T, set: Set<T>) => void): void;
-	get size(): number;
-	[Symbol.iterator](): IterableIterator<T>;
-	get [Symbol.toStringTag](): string;
-	add(value: T): this;
-	delete(value: T): boolean;
-	clear(): void;
-}
-/**
- * Forks remote state for local modification
- *
- * ```js
- * import { Signal } from 'signal-polyfill';
- * import { localCopy } from 'signal-utils';
- *
- * const remote = new Signal.State(0);
- *
- * const local = localCopy(() => remote.get());
- * ```
- */
-export declare function localCopy<Value = any>(fn: () => Value): {
-	get(): Value;
-	set(v: Value): void;
-};
-/**
- * Forks remote state for local modification
- *
- * ```js
- * import { localCopy } from 'signal-utils';
- *
- * class Demo {
- *    @localCopy('remote.value') accessor localValue;
- * }
- * ```
- */
-export declare function localCopy<Value = any, This extends WeakKey = WeakKey>(memo: string, initializer?: Value | (() => Value)): (_target: ClassAccessorDecoratorTarget<This, Value>, _context: ClassAccessorDecoratorContext<This, Value>) => ClassAccessorDecoratorResult<This, Value>;
-export type AsyncComputedStatus = "initial" | "pending" | "complete" | "error";
-export interface AsyncComputedOptions<T> {
-	/**
-	 * The initial value of the AsyncComputed.
-	 */
-	initialValue?: T;
-}
-/**
- * A signal-like object that represents an asynchronous computation.
- *
- * AsyncComputed takes a compute function that performs an asynchronous
- * computation and runs it inside a computed signal, while tracking the status
- * of the computation, including its most recent completion value and error.
- *
- * Compute functions are run when the `value`, `error`, or `complete` properties
- * are read, or when `get()` or `run()` are called, and are re-run when any
- * signals that they read change.
- *
- * If a new run of the compute function is started before the previous run has
- * completed, the previous run will have its AbortSignal aborted, and the result
- * of the previous run will be ignored.
- */
-export declare class AsyncComputed<T> {
-	#private;
-	/**
-	 * The current status of the AsyncComputed, which is one of 'initial',
-	 * 'pending', 'complete', or 'error'.
-	 *
-	 * The status will be 'initial' until the compute function is first run.
-	 *
-	 * The status will be 'pending' while the compute function is running. If the
-	 * status is 'pending', the `value` and `error` properties will be the result
-	 * of the previous run of the compute function.
-	 *
-	 * The status will be 'complete' when the compute function has completed
-	 * successfully. If the status is 'complete', the `value` property will be the
-	 * result of the previous run of the compute function and the `error` property
-	 * will be `undefined`.
-	 *
-	 * The status will be 'error' when the compute function has completed with an
-	 * error. If the status is 'error', the `error` property will be the error
-	 * that was thrown by the previous run of the compute function and the `value`
-	 * property will be `undefined`.
-	 *
-	 * This value is read from a signal, so any signals that read it will be
-	 * tracked as dependents of it.
-	 *
-	 * Accessing this property will cause the compute function to run if it hasn't
-	 * already.
-	 */
-	get status(): AsyncComputedStatus;
-	/**
-	 * The last value that the compute function resolved with, or `undefined` if
-	 * the last run of the compute function threw an error. If the compute
-	 * function has not yet been run `value` will be the value of the
-	 * `initialValue` or `undefined`.
-	 *
-	 * This value is read from a signal, so any signals that read it will be
-	 * tracked as dependents of it.
-	 *
-	 * Accessing this property will cause the compute function to run if it hasn't
-	 * already.
-	 */
-	get value(): T | undefined;
-	/**
-	 * The last error that the compute function threw, or `undefined` if the last
-	 * run of the compute function resolved successfully, or if the compute
-	 * function has not yet been run.
-	 *
-	 * This value is read from a signal, so any signals that read it will be
-	 * tracked as dependents of it.
-	 *
-	 * Accessing this property will cause the compute function to run if it hasn't
-	 * already.
-	 */
-	get error(): unknown;
-	/**
-	 * A promise that resolves when the compute function has completed, or rejects
-	 * if the compute function throws an error.
-	 *
-	 * If a new run of the compute function is started before the previous run has
-	 * completed, the promise will resolve with the result of the new run.
-	 *
-	 * This value is read from a signal, so any signals that read it will be
-	 * tracked as dependents of it. The identity of the promise will change if the
-	 * compute function is re-run after having completed or errored.
-	 *
-	 * Accessing this property will cause the compute function to run if it hasn't
-	 * already.
-	 */
-	get complete(): Promise<T>;
-	/**
-	 * Creates a new AsyncComputed signal.
-	 *
-	 * @param fn The function that performs the asynchronous computation. Any
-	 * signals read synchronously - that is, before the first await - will be
-	 * tracked as dependencies of the AsyncComputed, and cause the function to
-	 * re-run when they change.
-	 *
-	 * @param options.initialValue The initial value of the AsyncComputed.
-	 */
-	constructor(fn: (abortSignal: AbortSignal) => Promise<T>, options?: AsyncComputedOptions<T>);
-	/**
-	 * Returns the last value that the compute function resolved with, or
-	 * the initial value if the compute function has not yet been run.
-	 *
-	 * @throws The last error that the compute function threw, is the last run of
-	 * the compute function threw an error.
-	 */
-	get(): T | undefined;
-	/**
-	 * Runs the compute function if it is not already running and its dependencies
-	 * have changed.
-	 */
-	run(): void;
-}
-/**
- * ⚠️ WARNING: Nothing unwatches ⚠️
- * This will produce a memory leak.
- */
-export declare function effect(cb: () => void): () => void;
-export type AsyncMemoFetch<T> = () => Promise<T>;
-export type AsyncMemoOptions<T> = {
-	initialValue: T;
-	staleTime: number;
-};
-export type AsyncMemoStatus = "initial" | "stale" | "resolved" | "rejected" | "fetching";
-export declare function asyncMemo<T>(fn: () => Promise<T>, options: AsyncMemoOptions<T>): AsyncMemo<T>;
-export declare class AsyncMemo<T> {
-	#private;
-	staleTime: number | undefined;
-	constructor(fn: () => Promise<T>, options?: AsyncMemoOptions<T>);
-	refresh(): Promise<void>;
-	get value(): T | undefined;
-	setValue(value: T): void;
-	get error(): unknown;
-	get status(): AsyncMemoStatus;
-	get isPending(): boolean;
-	get isResolved(): boolean;
-	get isRejected(): boolean;
-}
-export declare function query<T>(key: string, fn: AsyncMemoFetch<T>, options: AsyncMemoOptions<T>): AsyncMemo<T>;
-export type ValidationError = Error | string | null | undefined;
-export type Validate<TValue> = (value: TValue) => Promise<ValidationError> | ValidationError;
-export type ControlOptions<TValue> = {
-	validate?: Validate<TValue>;
-	initialValue?: TValue;
-	fields?: {
-		[K in keyof TValue]: Omit<ControlOptions<TValue[K]>, "initialValue">;
-	};
-};
-export type Fields<TValue> = {
-	[K in keyof TValue]: Control<TValue[K]>;
-};
-declare abstract class Control<TValue> {
-	#private;
-	initialValue: TValue | undefined;
-	fields: Fields<TValue>;
-	constructor(options?: ControlOptions<TValue>);
-	get fieldArray(): Field<TValue>[];
-	validate(): Promise<boolean>;
-	get error(): ValidationError;
-	get isValidated(): boolean;
-	get isValidating(): boolean;
-	get errors(): ValidationError[];
-	get isPristine(): boolean;
-	get isDirty(): boolean;
-	get isInvalid(): Boolean;
-	get isValid(): false;
-	get value(): TValue;
-	setValue(value: TValue): void;
-}
-export type FormOptions<TValue extends object> = ControlOptions<TValue> & {};
-export declare class Form<TValue extends object = {}> extends Control<TValue> {
-	#private;
-	constructor(options: FormOptions<TValue>);
-	get value(): TValue;
-	setValue(value: TValue): void;
-	handleSubmit(onValid?: (value: TValue, control: Form<TValue>) => unknown, onInvalid?: (value: TValue, control: Form<TValue>) => unknown): Promise<void>;
-	get submitCount(): number;
-	get isSubmitted(): boolean;
-	get isSubmitting(): boolean;
-	focusError(): boolean;
-}
-declare class Field<TParent, TKey extends keyof TParent = keyof TParent, TValue = TParent[TKey]> extends Control<TValue> {
-	#private;
-	control: Control<TParent>;
-	name: TKey;
-	ref: {
-		value?: HTMLElement;
-	};
-	constructor(control: Control<TParent>, name: TKey, options?: ControlOptions<TValue>);
-	get value(): TValue;
-	setValue(value: TValue): void;
-	focusError(): boolean;
-}
-export declare function writableMemo<T>(computation: () => T, options?: Signal.Options<T>): Signal.State<T>;
-export declare function signal<T>(initialValue: T, options?: Signal.Options<T>): Signal.State<T>;
-export declare function memo<T>(computation: () => T, options?: Signal.Options<T>): Signal.Computed<T>;
 /**
  * @license
  * Copyright 2021 Google LLC
@@ -2857,75 +2647,28 @@ export type FieldMustMatchProvidedType<Obj, Key extends PropertyKey, ProvidedTyp
 	provided: ProvidedType;
 	consuming: ConsumingType | undefined;
 } : DecoratorReturn$1;
-export declare class WatchDirective<T> extends AsyncDirective {
-	private __host?;
-	private __signal?;
-	private __watcher?;
-	private __computed?;
-	private __watch;
-	private __unwatch;
-	commit(): void;
-	render(signal: Signal.State<T> | Signal.Computed<T>): T;
-	update(part: Part, [signal]: [
-		signal: Signal.State<T> | Signal.Computed<T>
-	]): T | undefined;
+export declare function LightDOM<T extends new (...args: any[]) => LitElement>(base: T): T;
+declare class OnDismount extends AsyncDirective {
+	render(): unknown;
+	elem: Element | undefined;
+	fn: ((elem: Element) => void) | undefined;
+	update(_part: Part, [fn]: [
+		(elem: Element) => void
+	]): unknown;
 	protected disconnected(): void;
-	protected reconnected(): void;
 }
-export type WatchDirectiveFunction = <T>(signal: Signal.State<T> | Signal.Computed<T>) => DirectiveResult<typeof WatchDirective<T>>;
-/**
- * Renders a signal and subscribes to it, updating the part when the signal
- * changes.
- *
- * watch() can only be used in a reactive element that applies the
- * SignalWatcher mixin.
- */
-export declare const watch: WatchDirectiveFunction;
-export type ReactiveElementConstructor = abstract new (...args: any[]) => ReactiveElement;
-export interface SignalWatcher extends ReactiveElement {
-	_updateWatchDirective(d: WatchDirective<unknown>): void;
-	_clearWatchDirective(d: WatchDirective<unknown>): void;
+export declare const onDismount: () => DirectiveResult<typeof OnDismount>;
+declare class OnMount extends AsyncDirective {
+	render(): unknown;
+	update(_part: Part, [fn]: [
+		(elem: Element) => void
+	]): unknown;
 }
-/**
- * Adds the ability for a LitElement or other ReactiveElement class to
- * watch for access to signals during the update lifecycle and trigger a new
- * update when signals values change.
- */
-export declare function SignalWatcher<T extends ReactiveElementConstructor>(Base: T): T;
-/**
- * Wraps a lit-html template tag function (`html` or `svg`) to add support for
- * automatically wrapping Signal instances in the `watch()` directive.
- */
-export declare const withWatch: (coreTag: typeof html | typeof svg) => (strings: TemplateStringsArray, ...values: unknown[]) => TemplateResult;
-/**
- * Interprets a template literal as an HTML template that can efficiently
- * render to and update a container.
- *
- * Includes signal watching support from `withWatch()`.
- */
-declare const html$1: (strings: TemplateStringsArray, ...values: unknown[]) => TemplateResult;
-/**
- * Interprets a template literal as an SVG template that can efficiently
- * render to and update a container.
- *
- * Includes signal watching support from `withWatch()`.
- */
-declare const svg$1: (strings: TemplateStringsArray, ...values: unknown[]) => TemplateResult;
-export declare function render(value: unknown, container: HTMLElement | DocumentFragment, options?: RenderOptions | undefined): RootPart;
-export declare class SignalHost {
-	private isPendingUpdate;
-	private __pendingWatches;
-	_updateWatchDirective(d: WatchDirective<unknown>): void;
-	_clearWatchDirective(d: WatchDirective<unknown>): void;
-	requestUpdate(): void;
-}
+export declare const onMount: () => DirectiveResult<typeof OnMount>;
 export * from "@lit-labs/context";
 
 export {
 	ContextRequestEvent as ContextEvent,
-	SignalObject$1 as SignalObject,
-	html$1 as html,
-	svg$1 as svg,
 };
 
 export {};

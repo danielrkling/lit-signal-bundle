@@ -1,10 +1,4 @@
 import { WatchDirective} from '@lit-labs/signals';
-import { render as litRender, RenderOptions } from 'lit';
-export {SignalWatcher, svg, html, watch, withWatch, WatchDirective} from '@lit-labs/signals'
-
-export function render(value: unknown, container: HTMLElement | DocumentFragment, options?: RenderOptions | undefined){
-    return litRender(value, container, {...options, host: new SignalHost()})
-}
 
 export class SignalHost {
     private isPendingUpdate = false;

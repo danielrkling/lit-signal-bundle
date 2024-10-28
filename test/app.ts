@@ -1,6 +1,4 @@
-import { render, html, signal } from "../dist/lit-signals.js";
-// import { render,html, signal } from "../src"
-
+import { render, html, signal } from "../lit+signals/src"
 
 const count = signal(0)
 

@@ -20,5 +20,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "test/app.ts"]
+  "include": ["test/app.ts", "lit/src", "lit+signals/src", "signals/src"],
 }
