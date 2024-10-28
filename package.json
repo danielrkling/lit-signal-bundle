@@ -6,13 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build:js && npm run build:types",
-    "build:js": "esbuild src/index.ts --outfile=dist/signals.js --bundle --format=esm --minify --analyze",
-    "build:types": "dts-bundle-generator -o dist/signals.d.ts src/index.ts --external-inlines signal-polyfill signal-utils"
+    "build:js": "esbuild src/index.ts --outfile=dist/lit-signals.js --bundle --format=esm --minify --analyze",
+    "build:types": "dts-bundle-generator -o dist/lit-signals.d.ts src/index.ts --external-inlines signal-polyfill signal-utils lit lit-html lit-element @lit/reactive-element @types/trusted-types @lit-labs/signals @lit/context"
   },
   "dependencies": {
     "@lit-labs/context": "^0.5.1",
     "@lit-labs/signals": "^0.1.1",
-    "install": "^0.13.0",
     "lit": "^3.2.1",
     "signal-polyfill": "^0.2.0",
     "signal-utils": "^0.20.0"
@@ -20,6 +19,7 @@
   "devDependencies": {
     "dts-bundle-generator": "^9.5.1",
     "esbuild": "^0.24.0",
+    "prettier": "^3.3.3",
     "typescript": "^5.5.3",
     "vite": "^5.4.8"
   }
