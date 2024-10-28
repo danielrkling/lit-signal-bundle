@@ -5,11 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build":"npm run build:js && npm run build:types",
+    "build": "npm run build:js && npm run build:types",
     "build:js": "esbuild src/index.ts --outfile=dist/signals.js --bundle --format=esm --minify --analyze",
     "build:types": "dts-bundle-generator -o dist/signals.d.ts src/index.ts --external-inlines signal-polyfill signal-utils"
   },
   "dependencies": {
+    "@lit-labs/context": "^0.5.1",
+    "@lit-labs/signals": "^0.1.1",
+    "install": "^0.13.0",
+    "lit": "^3.2.1",
     "signal-polyfill": "^0.2.0",
     "signal-utils": "^0.20.0"
   },

@@ -1,4 +1,4 @@
-import { signal, writableMemo, effect } from "../src/index";
+import { signal, writableMemo, effect } from "../src/signals/index";
 import { localCopy } from "signal-utils/local-copy";
 
 
