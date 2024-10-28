@@ -1,10 +1,10 @@
 import { signal, writableMemo, effect } from "../src/index";
-
+import { localCopy } from "signal-utils/local-copy";
 
 
 const count1 = signal(0)
 
-const count2 = writableMemo(()=>count1.get())
+const count2 = localCopy(()=>count1.get())
 
 console.log(count2.get())
 

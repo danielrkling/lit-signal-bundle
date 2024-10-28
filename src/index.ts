@@ -12,6 +12,8 @@ export { SignalArray } from "signal-utils/array";
 export { SignalObject } from "signal-utils/object";
 export { SignalMap } from "signal-utils/map";
 export { SignalSet } from "signal-utils/set";
+export {localCopy} from "signal-utils/local-copy";
+export {AsyncComputed} from "signal-utils/async-computed"
 
 // export { load } from "signal-utils/async-data";
 export { effect } from "signal-utils/subtle/microtask-effect";
